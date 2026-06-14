@@ -95,7 +95,7 @@ The entire check-and-record sequence runs as a **single atomic Lua script** in R
 |---|---|
 | **[Getting Started](./docs/getting-started.md)** | Clone, configure, and run the full stack |
 | **[API Reference](./docs/api-reference.md)** | Complete REST API documentation |
-| **[RateLatch-dashboard](https://github.com/yourusername/ratelatch-dashboard)** | Frontend dashboard repository |
+| **[RateLatch-dashboard](https://github.com/Krushnakant-08/ratelatch-dashboard)** | Frontend dashboard repository |
 
 ---
 

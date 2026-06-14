@@ -107,7 +107,7 @@ router.post('/login', async (req, res) => {
     }
 
     const result = await db.query(
-      'SELECT id, email, plan, status FROM tenants WHERE email = $1 AND project_key = $2',
+      'SELECT id, email, plan, status, role FROM tenants WHERE email = $1 AND project_key = $2',
       [email, projectKey]
     );
 
@@ -131,7 +131,7 @@ router.post('/login', async (req, res) => {
       {
         tenantId: tenant.id,
         email: tenant.email,
-        role: 'tenant',
+        role: tenant.role || 'tenant',
       },
       JWT_SECRET,
       { expiresIn: '30d' }

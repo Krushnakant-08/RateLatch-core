@@ -33,13 +33,16 @@ router.get('/', async (req, res) => {
  *
  * Create a new rate rule for the authenticated tenant.
  * Body: { route, keyBy, maxReq, windowMs, priority }
+ *
+ * Enforces plan limits:
+ *   - Max routes, allowed keyBy, priority access, maxReq cap
  */
 router.post('/', async (req, res) => {
   try {
     const { tenantId } = req.auth;
     const { route = '*', keyBy = 'ip', maxReq, windowMs, priority = 0 } = req.body;
 
-    // Validation
+    // Basic validation
     if (!maxReq || !windowMs) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -59,6 +62,30 @@ router.post('/', async (req, res) => {
       return res.status(400).json({
         error: 'Bad Request',
         message: `Invalid keyBy. Must be one of: ${validKeyBy.join(', ')}`,
+      });
+    }
+
+    // ─── Plan enforcement ───────────────────────────────
+    const tenantResult = await db.query('SELECT plan FROM tenants WHERE id = $1', [tenantId]);
+    if (tenantResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    const plan = tenantResult.rows[0].plan;
+
+    const countResult = await db.query(
+      'SELECT COUNT(*)::int AS count FROM rate_rules WHERE tenant_id = $1',
+      [tenantId]
+    );
+    const currentRuleCount = countResult.rows[0].count;
+
+    const { validateRuleForPlan } = require('../planLimits');
+    const errors = validateRuleForPlan(plan, { keyBy, maxReq, priority }, currentRuleCount, true);
+
+    if (errors.length > 0) {
+      return res.status(403).json({
+        error: 'Plan Limit Exceeded',
+        message: errors[0],
+        details: errors,
       });
     }
 
@@ -101,6 +128,38 @@ router.put('/:ruleId', async (req, res) => {
       return res.status(404).json({
         error: 'Not Found',
         message: 'Rule not found or does not belong to your project.',
+      });
+    }
+
+    // ─── Plan enforcement on update ─────────────────────
+    const tenantResult = await db.query('SELECT plan FROM tenants WHERE id = $1', [tenantId]);
+    const plan = tenantResult.rows[0]?.plan || 'free';
+
+    const { validateRuleForPlan } = require('../planLimits');
+    const planErrors = validateRuleForPlan(
+      plan,
+      {
+        keyBy: keyBy !== undefined ? keyBy : undefined,
+        maxReq: maxReq !== undefined ? maxReq : 0,
+        priority: priority !== undefined ? priority : 0,
+      },
+      0,
+      false // not a create
+    );
+
+    // Filter out irrelevant errors (only check fields being updated)
+    const relevantErrors = planErrors.filter(err => {
+      if (keyBy !== undefined && err.includes('key strategy')) return true;
+      if (priority !== undefined && err.includes('priority')) return true;
+      if (maxReq !== undefined && err.includes('requests per rule')) return true;
+      return false;
+    });
+
+    if (relevantErrors.length > 0) {
+      return res.status(403).json({
+        error: 'Plan Limit Exceeded',
+        message: relevantErrors[0],
+        details: relevantErrors,
       });
     }
 
