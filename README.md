@@ -6,7 +6,7 @@
 [![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis)](https://redis.io)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker)](https://docker.com)
-[![Dashboard](https://img.shields.io/badge/Dashboard-RateLatch--dashboard-indigo)](https://github.com/yourusername/ratelatch-dashboard)
+[![Dashboard](https://img.shields.io/badge/Dashboard-RateLatch--dashboard-indigo)](https://github.com/Krushnakant-08/RateLatch-dashboard)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
 
 ---
@@ -32,7 +32,7 @@ Your Client  →  [ RateLatch Gateway ]  →  Your API
 | **Zero Code Change** | Drop it in front of any HTTP API — no SDK required |
 | **Per-Route Rules** | Different limits for `/login` vs `/api/*` vs `*` catch-all |
 | **Key-By Strategies** | Limit by IP address, API Key, or User ID |
-| **Dashboard** | Real-time analytics and rule management via [RateLatch-dashboard](https://github.com/yourusername/ratelatch-dashboard) |
+| **Dashboard** | Real-time analytics and rule management via [RateLatch-dashboard](https://github.com/Krushnakant-08/RateLatch-dashboard) |
 | **Docker Native** | Single `docker compose up` to run the entire stack |
 
 ---
@@ -159,7 +159,7 @@ ratelatch-core/
 
 ## Related
 
-- **[RateLatch-dashboard](https://github.com/yourusername/ratelatch-dashboard)** — Next.js frontend with real-time analytics and rule management
+- **[RateLatch-dashboard](https://github.com/Krushnakant-08/RateLatch-dashboard)** — Next.js frontend with real-time analytics and rule management
 
 ---
 
