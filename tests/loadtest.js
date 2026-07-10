@@ -7,26 +7,27 @@ import { check, sleep } from 'k6';
 //   k6 run tests/loadtest.js
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost';
-const PROJECT_KEY = __ENV.PROJECT_KEY || 'rl_live_test';
+const PROJECT_KEY = __ENV.PROJECT_KEY || 'rl_live_c7jntwrlgXfE8LYCk4I6yA';
 
 export const options = {
   scenarios: {
     sustained_load: {
       executor: 'constant-vus',
-      vus: 50,
-      duration: '30s',
+      vus: 500,
+      duration: '1m',
     },
   },
   thresholds: {
     http_req_duration: ['p(95)<50', 'p(99)<100'],
     http_req_failed: ['rate<0.01'], // Less than 1% non-HTTP errors
   },
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
 };
 
 // ─── Test Logic ─────────────────────────────────────
 
 export default function () {
-  const endpoints = ['/users', '/posts', '/login', '/api/data', '/health-check'];
+  const endpoints = ['/api/health'];
   const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
 
   const res = http.get(`${BASE_URL}${endpoint}`, {

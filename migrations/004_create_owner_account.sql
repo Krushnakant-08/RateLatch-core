@@ -1,28 +1,24 @@
 -- 004_create_owner_account.sql
 -- Creates the platform owner/admin account
 -- Default credentials:
---   Email:       admin@ratelimiter.io
---   Project Key: rl_admin_master_key
+--   Email:    krushnakantpatil06@gmail.com
+--   Password: admin123  (change immediately after first login)
+--
+-- The password_hash below is bcrypt(admin123, 12 rounds).
+-- To generate a new hash: node -e "const b=require('bcrypt'); b.hash('yourpassword',12).then(console.log)"
 
--- First, add a 'role' column to tenants if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'tenants' AND column_name = 'role'
-  ) THEN
-    ALTER TABLE tenants ADD COLUMN role TEXT NOT NULL DEFAULT 'tenant';
-  END IF;
-END $$;
-
--- Insert the owner account (skip if already exists)
-INSERT INTO tenants (email, project_key, plan, upstream_url, role, status)
+INSERT INTO tenants (email, project_key, password_hash, plan, upstream_url, role, status)
 VALUES (
   'krushnakantpatil06@gmail.com',
-  'master_key',
+  'rl_admin_master',
+  '$2b$12$X6/JLdY1CSKC8QJoBBrvzu1cT63WifyJi4ZOgw500kj3DBhkmps0y',
   'enterprise',
   'https://localhost',
   'owner',
   'active'
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE
+  SET password_hash = EXCLUDED.password_hash,
+      role = EXCLUDED.role,
+      plan = EXCLUDED.plan,
+      updated_at = now();
